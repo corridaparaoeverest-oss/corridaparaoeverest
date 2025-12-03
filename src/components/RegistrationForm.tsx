@@ -6,6 +6,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { User, Mail, Phone, Shirt, CheckCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
 const RegistrationForm = () => {
   const { toast } = useToast();
@@ -16,7 +18,28 @@ const RegistrationForm = () => {
     telefone: "",
     tamanho_camisa: "",
     quer_camisa: false,
+    nome_na_camisa: "",
   });
+  
+  const formatBrPhone = (raw: string) => {
+    const digits = raw.replace(/\D/g, "");
+    if (digits.length <= 10) {
+      const d = digits.slice(0, 10);
+      const part1 = d.slice(0, 2);
+      const part2 = d.slice(2, 6);
+      const part3 = d.slice(6, 10);
+      return part1 ? `(${part1}) ${part2}${part3 ? `-${part3}` : ""}`.trim() : raw;
+    }
+    const d = digits.slice(0, 11);
+    const part1 = d.slice(0, 2);
+    const part2 = d.slice(2, 7);
+    const part3 = d.slice(7, 11);
+    return `(${part1}) ${part2}-${part3}`;
+  };
+
+  const isValidBrPhone = (value: string) => {
+    return /^\(\d{2}\)\s?\d{4,5}-\d{4}$/.test(value);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +62,22 @@ const RegistrationForm = () => {
       });
       return;
     }
+    if (!isValidBrPhone(formData.telefone)) {
+      toast({
+        title: "Telefone inválido",
+        description: "Use o formato (DD) 9XXXX-XXXX ou (DD) XXXX-XXXX.",
+        variant: "destructive",
+      });
+      return;
+    }
+    if (formData.quer_camisa && !formData.nome_na_camisa.trim()) {
+      toast({
+        title: "Nome na camisa",
+        description: "Por favor, informe o nome para impressão na camisa.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsSubmitting(true);
     
@@ -54,7 +93,8 @@ const RegistrationForm = () => {
           email: formData.email.trim(),
           telefone: formData.telefone.trim(),
           quer_camisa: formData.quer_camisa,
-          tamanho_camisa: formData.tamanho_camisa || undefined,
+            tamanho_camisa: formData.tamanho_camisa || undefined,
+            nome_na_camisa: formData.nome_na_camisa || undefined,
         }),
       });
       if (!resp.ok) {
@@ -70,6 +110,26 @@ const RegistrationForm = () => {
         title: "Inscrição realizada! 🎉",
         description: "Você receberá um e-mail de confirmação em breve.",
       });
+
+      try {
+        const payload: Database["public"]["Tables"]["registrations"]["Insert"] = {
+          nome: formData.nome.trim(),
+          email: formData.email.trim(),
+          telefone: formData.telefone.trim(),
+          quer_camisa: formData.quer_camisa,
+          tamanho_camisa: formData.tamanho_camisa || null,
+          nome_na_camisa: formData.nome_na_camisa ? formData.nome_na_camisa.trim() : null,
+          status_pagamento: "pendente",
+        };
+        const { error: dbError } = await supabase
+          .from("registrations")
+          .insert(payload);
+        if (dbError) {
+          console.warn("Falha ao gravar no banco:", dbError.message);
+        }
+      } catch (e) {
+        console.warn("Erro ao inserir no banco:", e instanceof Error ? e.message : e);
+      }
 
       try {
         const base = env.VITE_API_BASE_URL ? env.VITE_API_BASE_URL.replace(/\/$/, "") : "";
@@ -97,6 +157,7 @@ const RegistrationForm = () => {
         telefone: "",
         tamanho_camisa: "",
         quer_camisa: false,
+        nome_na_camisa: "",
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro desconhecido";
@@ -172,11 +233,12 @@ const RegistrationForm = () => {
                   id="telefone"
                   type="tel"
                   placeholder="(22) 99999-9999"
+                  inputMode="tel"
                   value={formData.telefone}
-                  onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, telefone: formatBrPhone(e.target.value) })}
                   required
                   className="h-12"
-                  maxLength={20}
+                  maxLength={16}
                 />
               </div>
               
@@ -218,6 +280,19 @@ const RegistrationForm = () => {
                         <SelectItem value="XGG">XGG</SelectItem>
                       </SelectContent>
                     </Select>
+                    <div className="space-y-2">
+                      <Label htmlFor="nome_na_camisa" className="text-foreground">Nome na camisa *</Label>
+                      <Input
+                        id="nome_na_camisa"
+                        type="text"
+                        placeholder="Como deve aparecer na camisa"
+                        value={formData.nome_na_camisa}
+                        onChange={(e) => setFormData({ ...formData, nome_na_camisa: e.target.value })}
+                        required
+                        className="h-12"
+                        maxLength={24}
+                      />
+                    </div>
                   </div>
                 )}
               </div>

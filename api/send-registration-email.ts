@@ -37,6 +37,8 @@ export default async function handler(req: RequestLike, res: ResponseLike) {
   }
 
   const apiKey = process.env.RESEND_API_KEY;
+  const fromAddress = process.env.RESEND_FROM || "Corrida para o Everest <onboarding@resend.dev>";
+  const testMode = (process.env.RESEND_TEST_MODE || "").toLowerCase() === "true";
   if (!apiKey) {
     res.status(400).json({ error: "RESEND_API_KEY não configurada" });
     return;
@@ -104,7 +106,7 @@ export default async function handler(req: RequestLike, res: ResponseLike) {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ from: "Corrida para o Everest <onboarding@resend.dev>", to, subject, html }),
+      body: JSON.stringify({ from: fromAddress, to, subject, html }),
     });
     if (!r.ok) {
       const t = await r.text();
@@ -114,8 +116,11 @@ export default async function handler(req: RequestLike, res: ResponseLike) {
   };
 
   try {
-    await send(["luizcarlostostes@gmail.com"], `Nova Inscrição - Corrida para o Everest: ${nome}`, organizerHtml);
-    await send([email], "Inscrição Confirmada - Corrida para o Everest 🏃", participantHtml);
+    const organizer = process.env.RESEND_ORGANIZER_EMAIL || "corridaparaoeverest@gmail.com";
+    await send([organizer], `Nova Inscrição - Corrida para o Everest: ${nome}`, organizerHtml);
+    if (!testMode) {
+      await send([email], "Inscrição Confirmada - Corrida para o Everest 🏃", participantHtml);
+    }
     res.status(200).json({ success: true, message: "Inscrição enviada com sucesso!" });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Erro ao enviar";

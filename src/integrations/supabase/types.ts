@@ -14,7 +14,41 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      registrations: {
+        Row: {
+          id: string
+          created_at: string
+          nome: string
+          email: string
+          telefone: string
+          quer_camisa: boolean
+          tamanho_camisa: string | null
+          nome_na_camisa: string | null
+          status_pagamento: string
+        }
+        Insert: {
+          id?: string
+          created_at?: string
+          nome: string
+          email: string
+          telefone: string
+          quer_camisa?: boolean
+          tamanho_camisa?: string | null
+          nome_na_camisa?: string | null
+          status_pagamento?: string
+        }
+        Update: {
+          id?: string
+          created_at?: string
+          nome?: string
+          email?: string
+          telefone?: string
+          quer_camisa?: boolean
+          tamanho_camisa?: string | null
+          nome_na_camisa?: string | null
+          status_pagamento?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
