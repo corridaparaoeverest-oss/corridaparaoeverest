@@ -327,9 +327,6 @@ const RegistrationForm = () => {
               </Button>
             </div>
           </form>
-          <p className="text-center text-muted-foreground text-sm mt-6">
-            Ao se inscrever, você receberá um e-mail de confirmação com os detalhes do evento.
-          </p>
           </div>
         </div>
         </div>
