@@ -118,10 +118,20 @@ export default async function handler(req: RequestLike, res: ResponseLike) {
   try {
     const organizer = process.env.RESEND_ORGANIZER_EMAIL || "corridaparaoeverest@gmail.com";
     await send([organizer], `Nova Inscrição - Corrida para o Everest: ${nome}`, organizerHtml);
+    let participantEmailSkipped = false;
     if (!testMode) {
-      await send([email], "Inscrição Confirmada - Corrida para o Everest 🏃", participantHtml);
+      try {
+        await send([email], "Inscrição Confirmada - Corrida para o Everest 🏃", participantHtml);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        if (msg.includes("validation_error") || msg.includes("\"statusCode\":403")) {
+          participantEmailSkipped = true;
+        } else {
+          throw e;
+        }
+      }
     }
-    res.status(200).json({ success: true, message: "Inscrição enviada com sucesso!" });
+    res.status(200).json({ success: true, message: "Inscrição enviada com sucesso!", participant_email_skipped: participantEmailSkipped });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Erro ao enviar";
     res.status(500).json({ error: msg });
