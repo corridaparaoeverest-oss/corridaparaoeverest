@@ -87,7 +87,7 @@ const ConfigPanel = ({ open, onOpenChange }: Props) => {
     <>
       {open && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-background w-full max-w-3xl rounded-2xl border border-border shadow-lg">
+          <div className="bg-background w-full max-w-3xl rounded-2xl border border-border shadow-lg text-foreground">
             <div className="flex items-center justify-between p-4 border-b border-border">
               <h3 className="font-display text-xl text-foreground">Configuração</h3>
               <button className="p-2 rounded-md hover:bg-muted" onClick={() => onOpenChange(false)}>
@@ -97,12 +97,12 @@ const ConfigPanel = ({ open, onOpenChange }: Props) => {
 
             {!authorized ? (
               <div className="p-6">
-                <label className="block text-sm text-muted-foreground mb-2">Senha</label>
+                <label className="block text-sm mb-2">Senha</label>
                 <input
                   type="password"
                   value={pass}
                   onChange={(e) => setPass(e.target.value)}
-                  className="w-full h-12 px-3 rounded-md border border-border bg-card text-foreground"
+                  className="w-full h-12 px-3 rounded-md border border-border bg-card text-foreground placeholder:text-foreground/70"
                   placeholder="Digite a senha"
                 />
                 <div className="mt-4 flex justify-end">
@@ -121,7 +121,7 @@ const ConfigPanel = ({ open, onOpenChange }: Props) => {
                     type="text"
                     value={q}
                     onChange={(e) => setQ(e.target.value)}
-                    className="flex-1 h-10 px-3 rounded-md border border-border bg-card text-foreground"
+                    className="flex-1 h-10 px-3 rounded-md border border-border bg-card text-foreground placeholder:text-foreground/70"
                     placeholder="Buscar por nome"
                   />
                   <button
@@ -131,13 +131,13 @@ const ConfigPanel = ({ open, onOpenChange }: Props) => {
                     Atualizar
                   </button>
                 </div>
-                {loading && <div className="text-muted-foreground">Carregando...</div>}
+                {loading && <div className="">Carregando...</div>}
                 {error && <div className="text-destructive">{error}</div>}
                 {!loading && !error && (
                   <div className="overflow-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="text-muted-foreground">
+                        <tr>
                           <th className="text-left py-2 pr-2">Nome</th>
                           <th className="text-left py-2 pr-2">Status</th>
                           <th className="text-left py-2 pr-2">Data</th>

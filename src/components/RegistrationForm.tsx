@@ -176,14 +176,18 @@ const RegistrationForm = () => {
     <section id="inscricao" className="py-20 bg-background">
       <div className="container">
         <div className="max-w-2xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-display text-foreground mb-4">
-              Faça sua <span className="text-secondary">Inscrição</span>
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              Garanta sua vaga na Corrida para o Everest - 26/12/2025
-            </p>
-          </div>
+        <div className="text-center mb-12">
+          <h2 className="text-4xl md:text-5xl font-display text-foreground mb-4">
+            Faça sua <span className="text-secondary">Inscrição</span>
+          </h2>
+          <p className="text-muted-foreground text-lg">
+            Garanta sua vaga na Corrida para o Everest - 26/12/2025
+          </p>
+        </div>
+        <div className="mb-8 rounded-2xl border border-secondary bg-secondary/10 p-6 text-center">
+          <p className="text-2xl font-bold text-secondary">Valor: R$ 70,00</p>
+          <p className="mt-2 text-foreground">Pague com PIX para: <span className="font-medium">corridaparaoeverest@gmail.com</span></p>
+        </div>
           
           <form onSubmit={handleSubmit} className="card-glass rounded-2xl p-8 border border-border/50">
             <div className="space-y-6">
@@ -298,13 +302,13 @@ const RegistrationForm = () => {
               </div>
               
               {/* Submit */}
-              <Button 
-                type="submit" 
-                variant="hero" 
-                size="xl" 
-                className="w-full"
-                disabled={isSubmitting}
-              >
+          <Button 
+            type="submit" 
+            variant="hero" 
+            size="xl" 
+            className="w-full"
+            disabled={isSubmitting}
+          >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
                     <div className="w-5 h-5 border-2 border-secondary-foreground/30 border-t-secondary-foreground rounded-full animate-spin" />
