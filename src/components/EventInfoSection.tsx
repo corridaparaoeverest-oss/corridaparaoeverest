@@ -4,11 +4,7 @@ const infoCards = [
   {
     icon: MapPin,
     title: "Largada",
-<<<<<<< HEAD
     description: "Parque de Exposições",
-=======
-    description: "Praça Dona Ermelinda",
->>>>>>> 09470fbd4707399b0e62a81a255f5899c44693f4
     subtitle: "Miracema - RJ",
   },
   {
