@@ -1,8 +1,12 @@
 import { MapPin, Flag, Mountain } from "lucide-react";
 
 const RouteSection = () => {
+<<<<<<< HEAD
   // Endereços encodados para Google Maps
   const enderecoLargada = encodeURIComponent("Parque de Exposições - Miracema RJ");
+=======
+  // Endereço de chegada encodado para Google Maps
+>>>>>>> 09470fbd4707399b0e62a81a255f5899c44693f4
   const enderecoChegada = encodeURIComponent("x Flores - Estr. Miracema, km 10 - Rural, Miracema - RJ, 28460-000");
   
   return (
@@ -21,14 +25,22 @@ const RouteSection = () => {
         <div className="max-w-4xl mx-auto">
           <div className="relative rounded-2xl overflow-hidden shadow-lg border border-border">
             <iframe
+<<<<<<< HEAD
               src={`https://www.google.com/maps/embed/v1/directions?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&origin=${enderecoLargada}&destination=${enderecoChegada}&mode=walking`}
+=======
+              src={`https://www.google.com/maps/embed/v1/place?key=AIzaSyBFw0Qbyq9zTFTd-tUY6dZWTgaQzuU17R8&q=${enderecoChegada}&zoom=14`}
+>>>>>>> 09470fbd4707399b0e62a81a255f5899c44693f4
               width="100%"
               height="450"
               style={{ border: 0 }}
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
+<<<<<<< HEAD
               title="Percurso marcado no mapa"
+=======
+              title="Mapa do Percurso - Sítio Everest"
+>>>>>>> 09470fbd4707399b0e62a81a255f5899c44693f4
               className="w-full"
             />
           </div>
@@ -41,7 +53,11 @@ const RouteSection = () => {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground uppercase">Largada</p>
+<<<<<<< HEAD
                 <p className="font-display text-foreground">Parque de Exposições</p>
+=======
+                <p className="font-display text-foreground">Praça Dona Ermelinda</p>
+>>>>>>> 09470fbd4707399b0e62a81a255f5899c44693f4
               </div>
             </div>
             

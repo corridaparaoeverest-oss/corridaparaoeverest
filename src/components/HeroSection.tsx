@@ -42,7 +42,11 @@ const HeroSection = () => {
             </div>
             <div className="flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm px-4 py-2 rounded-full">
               <MapPin className="w-5 h-5 text-sunset" />
+<<<<<<< HEAD
               <span className="text-sm md:text-base">Parque de Exposições</span>
+=======
+              <span className="text-sm md:text-base">Praça Dona Ermelinda</span>
+>>>>>>> 09470fbd4707399b0e62a81a255f5899c44693f4
             </div>
             <div className="flex items-center gap-2 bg-primary-foreground/10 backdrop-blur-sm px-4 py-2 rounded-full">
               <Timer className="w-5 h-5 text-sunset" />
