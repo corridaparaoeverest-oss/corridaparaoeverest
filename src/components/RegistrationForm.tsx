@@ -20,6 +20,7 @@ const RegistrationForm = () => {
     quer_camisa: false,
     nome_na_camisa: "",
   });
+  const registrationsClosed = true;
   
   const formatBrPhone = (raw: string) => {
     const digits = raw.replace(/\D/g, "");
@@ -43,6 +44,14 @@ const RegistrationForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (registrationsClosed) {
+      toast({
+        title: "Inscrições encerradas",
+        description: "As inscrições não estão mais disponíveis.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     // Validation
     if (!formData.nome.trim() || !formData.email.trim() || !formData.telefone.trim()) {
@@ -189,12 +198,15 @@ const RegistrationForm = () => {
             <img src="/camisa.jpeg" alt="Camisa do evento" className="w-full h-full object-cover" />
           </div>
           <div>
+            <div className="mb-4 rounded-2xl border border-destructive bg-destructive/10 p-4 text-center">
+              <p className="text-lg font-semibold text-destructive">Inscrições encerradas</p>
+            </div>
             <div className="mb-8 rounded-2xl border border-secondary bg-secondary/10 p-6 text-center">
               <p className="text-2xl font-bold text-secondary">Valor: R$ 70,00</p>
               <p className="mt-2 text-foreground">Pague com PIX para: <span className="font-medium">corridaparaoeverest@gmail.com</span></p>
             </div>
             <form onSubmit={handleSubmit} className="card-glass rounded-2xl p-8 border border-border/50">
-            <div className="space-y-6">
+            <fieldset disabled={registrationsClosed} className="space-y-6">
               {/* Nome */}
               <div className="space-y-2">
                 <Label htmlFor="nome" className="flex items-center gap-2 text-foreground">
@@ -311,9 +323,13 @@ const RegistrationForm = () => {
             variant="hero" 
             size="xl" 
             className="w-full"
-            disabled={isSubmitting}
+            disabled={isSubmitting || registrationsClosed}
           >
-                {isSubmitting ? (
+                {registrationsClosed ? (
+                  <span className="flex items-center justify-center gap-2">
+                    Inscrições Encerradas
+                  </span>
+                ) : isSubmitting ? (
                   <span className="flex items-center gap-2">
                     <div className="w-5 h-5 border-2 border-secondary-foreground/30 border-t-secondary-foreground rounded-full animate-spin" />
                     Enviando...
@@ -325,8 +341,8 @@ const RegistrationForm = () => {
                   </span>
                 )}
               </Button>
-            </div>
-          </form>
+            </fieldset>
+            </form>
           </div>
         </div>
         </div>
