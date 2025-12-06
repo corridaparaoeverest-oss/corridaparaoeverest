@@ -18,9 +18,8 @@ const RegistrationForm = () => {
     telefone: "",
     tamanho_camisa: "",
     quer_camisa: false,
-    nome_na_camisa: "",
   });
-  const registrationsClosed = true;
+  const registrationsClosed = false;
   
   const formatBrPhone = (raw: string) => {
     const digits = raw.replace(/\D/g, "");
@@ -79,10 +78,10 @@ const RegistrationForm = () => {
       });
       return;
     }
-    if (formData.quer_camisa && !formData.nome_na_camisa.trim()) {
+    if (formData.quer_camisa && !["M", "G"].includes(formData.tamanho_camisa)) {
       toast({
-        title: "Nome na camisa",
-        description: "Por favor, informe o nome para impressão na camisa.",
+        title: "Tamanho da camisa",
+        description: "Somente tamanhos M e G estão disponíveis.",
         variant: "destructive",
       });
       return;
@@ -103,7 +102,6 @@ const RegistrationForm = () => {
           telefone: formData.telefone.trim(),
           quer_camisa: formData.quer_camisa,
             tamanho_camisa: formData.tamanho_camisa || undefined,
-            nome_na_camisa: formData.nome_na_camisa || undefined,
         }),
       });
       if (!resp.ok) {
@@ -127,7 +125,6 @@ const RegistrationForm = () => {
           telefone: formData.telefone.trim(),
           quer_camisa: formData.quer_camisa,
           tamanho_camisa: formData.tamanho_camisa || null,
-          nome_na_camisa: formData.nome_na_camisa ? formData.nome_na_camisa.trim() : null,
           status_pagamento: "pendente",
         };
         const { error: dbError } = await supabase
@@ -166,7 +163,6 @@ const RegistrationForm = () => {
         telefone: "",
         tamanho_camisa: "",
         quer_camisa: false,
-        nome_na_camisa: "",
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro desconhecido";
@@ -198,8 +194,8 @@ const RegistrationForm = () => {
             <img src="/camisa.jpeg" alt="Camisa do evento" className="w-full h-full object-cover" />
           </div>
           <div>
-            <div className="mb-4 rounded-2xl border border-destructive bg-destructive/10 p-4 text-center">
-              <p className="text-lg font-semibold text-destructive">Inscrições encerradas</p>
+            <div className="mb-4 rounded-2xl border border-secondary bg-secondary/10 p-4 text-center">
+              <p className="text-lg font-semibold text-secondary">Sem personalização do nome; tamanhos disponíveis: M e G</p>
             </div>
             <div className="mb-8 rounded-2xl border border-secondary bg-secondary/10 p-6 text-center">
               <p className="text-2xl font-bold text-secondary">Valor: R$ 70,00</p>
@@ -292,27 +288,10 @@ const RegistrationForm = () => {
                         <SelectValue placeholder="Selecione o tamanho" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="PP">PP</SelectItem>
-                        <SelectItem value="P">P</SelectItem>
                         <SelectItem value="M">M</SelectItem>
                         <SelectItem value="G">G</SelectItem>
-                        <SelectItem value="GG">GG</SelectItem>
-                        <SelectItem value="XGG">XGG</SelectItem>
                       </SelectContent>
                     </Select>
-                    <div className="space-y-2">
-                      <Label htmlFor="nome_na_camisa" className="text-foreground">Nome na camisa *</Label>
-                      <Input
-                        id="nome_na_camisa"
-                        type="text"
-                        placeholder="Como deve aparecer na camisa"
-                        value={formData.nome_na_camisa}
-                        onChange={(e) => setFormData({ ...formData, nome_na_camisa: e.target.value })}
-                        required
-                        className="h-12"
-                        maxLength={24}
-                      />
-                    </div>
                   </div>
                 )}
               </div>
