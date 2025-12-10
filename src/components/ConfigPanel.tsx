@@ -13,7 +13,9 @@ type Row = {
   status_pagamento: string;
   sexo: string | null;
   tempo: number | null;
-  tempoText?: string;
+  tempoH?: string;
+  tempoM?: string;
+  tempoS?: string;
 };
 
 const PASS = "corrid@";
@@ -104,30 +106,26 @@ const ConfigPanel = ({ open, onOpenChange }: Props) => {
     return `${mm}:${ss}`;
   }
 
-  function parseClockToSeconds(txt: string): number | null {
-    const t = (txt || "").trim();
-    if (!t) return null;
-    const parts = t.split(":").map((p) => p.trim());
-    if (parts.length === 2) {
-      const [mm, ss] = parts;
-      const m = Number(mm);
-      const s = Number(ss);
-      if (Number.isFinite(m) && Number.isFinite(s) && m >= 0 && s >= 0 && s < 60) {
-        return m * 60 + s;
-      }
-      return null;
-    }
-    if (parts.length === 3) {
-      const [hh, mm, ss] = parts;
-      const h = Number(hh);
-      const m = Number(mm);
-      const s = Number(ss);
-      if (Number.isFinite(h) && Number.isFinite(m) && Number.isFinite(s) && h >= 0 && m >= 0 && s >= 0 && m < 60 && s < 60) {
-        return h * 3600 + m * 60 + s;
-      }
-      return null;
-    }
-    return null;
+  function toParts(s: number | null): { hh: string; mm: string; ss: string } {
+    if (s == null || isNaN(s)) return { hh: "", mm: "", ss: "" };
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    return {
+      hh: String(h),
+      mm: String(m).padStart(2, "0"),
+      ss: String(sec).padStart(2, "0"),
+    };
+  }
+
+  function partsToSeconds(hh: string | undefined, mm: string | undefined, ss: string | undefined): number | null {
+    const h = Number(hh || "0");
+    const m = Number(mm || "0");
+    const s = Number(ss || "0");
+    if (!Number.isFinite(h) || !Number.isFinite(m) || !Number.isFinite(s)) return null;
+    const mClamped = Math.max(0, Math.min(59, m));
+    const sClamped = Math.max(0, Math.min(59, s));
+    return h * 3600 + mClamped * 60 + sClamped;
   }
 
   const [finalCorrida, setFinalCorrida] = useState(false);
@@ -158,7 +156,7 @@ const ConfigPanel = ({ open, onOpenChange }: Props) => {
     <>
       {open && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-background w-full max-w-3xl rounded-2xl border border-border shadow-lg text-foreground">
+          <div className="bg-background w-full max-w-3xl rounded-2xl border border-border shadow-lg text-foreground max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between p-4 border-b border-border">
               <h3 className="font-display text-xl text-foreground">Configuração</h3>
               <button className="p-2 rounded-md hover:bg-muted" onClick={() => onOpenChange(false)}>
@@ -211,7 +209,7 @@ const ConfigPanel = ({ open, onOpenChange }: Props) => {
                         <tr>
                           <th className="text-left py-2 pr-2">Nome</th>
                           <th className="text-left py-2 pr-2">Status</th>
-                          <th className="text-left py-2 pr-2">Tempo (mm:ss ou hh:mm:ss)</th>
+                          <th className="text-left py-2 pr-2">Tempo (hh:mm:ss)</th>
                           <th className="text-left py-2 pr-2">Data</th>
                           <th className="text-right py-2 pl-2">Ações</th>
                         </tr>
@@ -240,16 +238,58 @@ const ConfigPanel = ({ open, onOpenChange }: Props) => {
                               </select>
                             </td>
                             <td className="py-2 pr-2">
-                              <input
-                                type="text"
-                                value={r.tempoText ?? ""}
-                                onChange={(e) => {
-                                  const val = e.target.value;
-                                  setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, tempoText: val, tempo: parseClockToSeconds(val) } : x)));
-                                }}
-                                placeholder="mm:ss"
-                                className="h-9 px-2 rounded-md border border-border bg-card text-foreground w-36"
-                              />
+                              <div className="flex items-center gap-1">
+                                <input
+                                  type="text"
+                                  inputMode="numeric"
+                                  pattern="[0-9]*"
+                                  value={r.tempoH ?? toParts(r.tempo).hh}
+                                  onChange={(e) => {
+                                    const raw = e.target.value.replace(/\D/g, "").slice(0, 2);
+                                    const hh = raw;
+                                    const mm = r.tempoM ?? toParts(r.tempo).mm;
+                                    const ss = r.tempoS ?? toParts(r.tempo).ss;
+                                    const seconds = partsToSeconds(hh, mm, ss);
+                                    setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, tempoH: hh, tempo: seconds } : x)));
+                                  }}
+                                  placeholder="hh"
+                                  className="h-9 w-14 px-2 rounded-md border border-border bg-card text-foreground text-center"
+                                />
+                                <span>:</span>
+                                <input
+                                  type="text"
+                                  inputMode="numeric"
+                                  pattern="[0-9]*"
+                                  value={r.tempoM ?? toParts(r.tempo).mm}
+                                  onChange={(e) => {
+                                    const raw = e.target.value.replace(/\D/g, "").slice(0, 2);
+                                    const mm = raw;
+                                    const hh = r.tempoH ?? toParts(r.tempo).hh;
+                                    const ss = r.tempoS ?? toParts(r.tempo).ss;
+                                    const seconds = partsToSeconds(hh, mm, ss);
+                                    setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, tempoM: mm, tempo: seconds } : x)));
+                                  }}
+                                  placeholder="mm"
+                                  className="h-9 w-12 px-2 rounded-md border border-border bg-card text-foreground text-center"
+                                />
+                                <span>:</span>
+                                <input
+                                  type="text"
+                                  inputMode="numeric"
+                                  pattern="[0-9]*"
+                                  value={r.tempoS ?? toParts(r.tempo).ss}
+                                  onChange={(e) => {
+                                    const raw = e.target.value.replace(/\D/g, "").slice(0, 2);
+                                    const ss = raw;
+                                    const hh = r.tempoH ?? toParts(r.tempo).hh;
+                                    const mm = r.tempoM ?? toParts(r.tempo).mm;
+                                    const seconds = partsToSeconds(hh, mm, ss);
+                                    setRows((prev) => prev.map((x) => (x.id === r.id ? { ...x, tempoS: ss, tempo: seconds } : x)));
+                                  }}
+                                  placeholder="ss"
+                                  className="h-9 w-12 px-2 rounded-md border border-border bg-card text-foreground text-center"
+                                />
+                              </div>
                             </td>
                             <td className="py-2 pr-2">{new Date(r.created_at).toLocaleString()}</td>
                             <td className="py-2 pl-2 text-right">
