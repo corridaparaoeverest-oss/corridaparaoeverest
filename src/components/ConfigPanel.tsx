@@ -128,7 +128,19 @@ const ConfigPanel = ({ open, onOpenChange }: Props) => {
     return h * 3600 + mClamped * 60 + sClamped;
   }
 
-  const [finalCorrida, setFinalCorrida] = useState(false);
+  const [finalCorrida, setFinalCorrida] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("finalCorrida") === "1";
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("finalCorrida", finalCorrida ? "1" : "0");
+    } catch {}
+  }, [finalCorrida]);
 
   const maleRows = useMemo(() =>
     rows
