@@ -49,14 +49,50 @@ const RankingSection = () => {
       setLoading(true);
       setError(null);
       try {
-        const { data, error } = await supabase
-          .from("registrations")
-          .select("id, nome, sexo, tempo");
-        if (error) throw new Error(error.message);
-        setRows((data || []) as Row[]);
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : "Erro ao carregar ranking";
-        setError(msg);
+        const env = import.meta.env as { VITE_SUPABASE_URL?: string; VITE_SUPABASE_PUBLISHABLE_KEY?: string; VITE_RANKING_TSV_URL?: string };
+        let loadedFromSupabase = false;
+
+        if (env.VITE_SUPABASE_URL && env.VITE_SUPABASE_PUBLISHABLE_KEY) {
+          try {
+            const { data, error } = await supabase
+              .from("registrations")
+              .select("id, nome, sexo, tempo");
+            if (error) throw new Error(error.message);
+            setRows((data || []) as Row[]);
+            loadedFromSupabase = true;
+          } catch (err) {
+            console.warn("Supabase indisponível; usando TSV como fallback:", err);
+          }
+        }
+
+        if (!loadedFromSupabase) {
+          const url = env.VITE_RANKING_TSV_URL ?? "/ranking.tsv";
+          try {
+            const res = await fetch(url, { cache: "no-store" });
+            if (!res.ok) throw new Error("Falha ao carregar ranking TSV");
+            const text = await res.text();
+            const lines = text.split(/\r?\n/).filter((l) => l.trim().length > 0);
+            if (lines.length === 0) {
+              setRows([]);
+            } else {
+              const hasHeader = /^nome\t/i.test(lines[0]);
+              const dataLines = hasHeader ? lines.slice(1) : lines;
+              const parsed = dataLines
+                .map((line) => line.split("\t"))
+                .filter((cols) => cols[0] && cols[0].trim().length > 0)
+                .map((cols, idx) => ({
+                  id: `${cols[0]}-${idx}`,
+                  nome: cols[0]?.trim() || "",
+                  sexo: (cols[1]?.trim() || "").toUpperCase(),
+                  tempo: Number(cols[2] || "") || null,
+                }));
+              setRows(parsed);
+            }
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : "Erro ao carregar fallback TSV";
+            setError(msg);
+          }
+        }
       } finally {
         setLoading(false);
       }
