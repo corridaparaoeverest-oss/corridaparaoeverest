@@ -176,15 +176,24 @@ const ConfigPanel = ({ open, onOpenChange }: Props) => {
 
   const toggleFinalCorrida = async (checked: boolean) => {
     setFinalCorrida(checked);
+    setSaving(true);
+    setSaveMsg(null);
     try {
       await supabase
         .from("settings")
         .upsert({ key: "final_corrida", value: checked, updated_at: new Date().toISOString() });
+      setSaveMsg("Salvo no Supabase");
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       console.warn("Erro ao salvar flag final_corrida:", msg);
+      setSaveMsg("Erro ao salvar");
+    } finally {
+      setSaving(false);
     }
   };
+
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState<string | null>(null);
 
   
 
@@ -370,8 +379,10 @@ const ConfigPanel = ({ open, onOpenChange }: Props) => {
                       onChange={(e) => toggleFinalCorrida(e.target.checked)}
                       className="h-4 w-4"
                     />
-                    <span className="font-semibold">Final de Corrida</span>
-                  </label>
+                  <span className="font-semibold">Final de Corrida</span>
+                </label>
+                {saving && <p className="mt-2 text-sm text-muted-foreground">Salvando...</p>}
+                {!saving && saveMsg && <p className="mt-2 text-sm text-muted-foreground">{saveMsg}</p>}
               </div>
             </div>
           )}

@@ -171,39 +171,43 @@ const RankingSection = () => {
         {!loading && !error && (male.length > 0 || female.length > 0) && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             <div>
-              <h3 className="text-2xl font-semibold mb-4">Masculino</h3>
+              <h3 className="text-2xl font-semibold mb-4 text-blue-600">Masculino</h3>
               <ul className="grid grid-cols-1 gap-4">
                 {male.map((r, idx) => (
                   <li
                     key={r.id}
                     className="flex items-center gap-3 bg-card rounded-full px-6 py-3 shadow-md border border-border"
                   >
-                    <div className="p-2 rounded-full bg-primary/10">
-                      <div className="w-5 h-5 rounded-full bg-primary" />
+                    <div className="p-2 rounded-full bg-blue-100">
+                      <div className="w-5 h-5 rounded-full bg-blue-600" />
                     </div>
                     <div className="flex-1">
                       <p className="font-display text-foreground">{idx + 1}. {r.nome}</p>
                     </div>
-                    <div className="text-muted-foreground">{formatSecondsToClock(r.tempo)}</div>
+                    <div className="inline-flex items-center rounded-full bg-blue-100 text-blue-700 px-3 py-1 font-semibold">
+                      {formatSecondsToClock(r.tempo)}
+                    </div>
                   </li>
                 ))}
               </ul>
             </div>
             <div>
-              <h3 className="text-2xl font-semibold mb-4">Feminino</h3>
+              <h3 className="text-2xl font-semibold mb-4 text-pink-600">Feminino</h3>
               <ul className="grid grid-cols-1 gap-4">
                 {female.map((r, idx) => (
                   <li
                     key={r.id}
                     className="flex items-center gap-3 bg-card rounded-full px-6 py-3 shadow-md border border-border"
                   >
-                    <div className="p-2 rounded-full bg-primary/10">
-                      <div className="w-5 h-5 rounded-full bg-primary" />
+                    <div className="p-2 rounded-full bg-pink-100">
+                      <div className="w-5 h-5 rounded-full bg-pink-600" />
                     </div>
                     <div className="flex-1">
                       <p className="font-display text-foreground">{idx + 1}. {r.nome}</p>
                     </div>
-                    <div className="text-muted-foreground">{formatSecondsToClock(r.tempo)}</div>
+                    <div className="inline-flex items-center rounded-full bg-pink-100 text-pink-700 px-3 py-1 font-semibold">
+                      {formatSecondsToClock(r.tempo)}
+                    </div>
                   </li>
                 ))}
               </ul>
