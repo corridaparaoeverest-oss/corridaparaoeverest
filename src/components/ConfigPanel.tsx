@@ -195,6 +195,61 @@ const ConfigPanel = ({ open, onOpenChange }: Props) => {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
 
+  const [inscricoesAbertas, setInscricoesAbertas] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("inscricoesAbertas") !== "0";
+    } catch {
+      return true;
+    }
+  });
+
+  useEffect(() => {
+    const loadRegFlag = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("settings")
+          .select("value")
+          .eq("key", "inscricoes_abertas")
+          .maybeSingle();
+        if (!error && data && typeof data.value === "boolean") {
+          const open = Boolean(data.value);
+          setInscricoesAbertas(open);
+          try {
+            localStorage.setItem("inscricoesAbertas", open ? "1" : "0");
+          } catch {}
+        }
+      } catch {}
+    };
+    if (open && authorized) {
+      loadRegFlag();
+    }
+  }, [open, authorized]);
+
+  const [savingReg, setSavingReg] = useState(false);
+  const [saveRegMsg, setSaveRegMsg] = useState<string | null>(null);
+
+  const toggleFimInscricoes = async (checked: boolean) => {
+    const open = !checked;
+    setInscricoesAbertas(open);
+    setSavingReg(true);
+    setSaveRegMsg(null);
+    try {
+      await supabase
+        .from("settings")
+        .upsert({ key: "inscricoes_abertas", value: open, updated_at: new Date().toISOString() });
+      setSaveRegMsg("Salvo no Supabase");
+      try {
+        localStorage.setItem("inscricoesAbertas", open ? "1" : "0");
+      } catch {}
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.warn("Erro ao salvar flag inscricoes_abertas:", msg);
+      setSaveRegMsg("Erro ao salvar");
+    } finally {
+      setSavingReg(false);
+    }
+  };
+
   
 
   return (
@@ -372,17 +427,30 @@ const ConfigPanel = ({ open, onOpenChange }: Props) => {
                 </div>
               )}
               <div className="mt-4 p-4 border rounded-md">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={finalCorrida}
-                      onChange={(e) => toggleFinalCorrida(e.target.checked)}
-                      className="h-4 w-4"
-                    />
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={finalCorrida}
+                    onChange={(e) => toggleFinalCorrida(e.target.checked)}
+                    className="h-4 w-4"
+                  />
                   <span className="font-semibold">Final de Corrida</span>
                 </label>
                 {saving && <p className="mt-2 text-sm text-muted-foreground">Salvando...</p>}
                 {!saving && saveMsg && <p className="mt-2 text-sm text-muted-foreground">{saveMsg}</p>}
+              </div>
+              <div className="mt-4 p-4 border rounded-md">
+                <label className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={!inscricoesAbertas}
+                    onChange={(e) => toggleFimInscricoes(e.target.checked)}
+                    className="h-4 w-4"
+                  />
+                  <span className="font-semibold">Fim de Inscrições</span>
+                </label>
+                {savingReg && <p className="mt-2 text-sm text-muted-foreground">Salvando...</p>}
+                {!savingReg && saveRegMsg && <p className="mt-2 text-sm text-muted-foreground">{saveRegMsg}</p>}
               </div>
             </div>
           )}

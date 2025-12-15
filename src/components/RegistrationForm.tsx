@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +19,36 @@ const RegistrationForm = () => {
     tamanho_camisa: "",
     quer_camisa: false,
   });
-  const registrationsClosed = true;
+  const [registrationsClosed, setRegistrationsClosed] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem("inscricoesAbertas") === "0";
+    } catch {
+      return false;
+    }
+  });
+
+  useEffect(() => {
+    const loadFlag = async () => {
+      try {
+        const env = import.meta.env as { VITE_SUPABASE_URL?: string; VITE_SUPABASE_PUBLISHABLE_KEY?: string };
+        if (env.VITE_SUPABASE_URL && env.VITE_SUPABASE_PUBLISHABLE_KEY) {
+          const { data, error } = await supabase
+            .from("settings")
+            .select("value")
+            .eq("key", "inscricoes_abertas")
+            .maybeSingle();
+          if (!error && data && typeof data.value === "boolean") {
+            const closed = !Boolean(data.value);
+            setRegistrationsClosed(closed);
+            try {
+              localStorage.setItem("inscricoesAbertas", data.value ? "1" : "0");
+            } catch {}
+          }
+        }
+      } catch {}
+    };
+    loadFlag();
+  }, []);
   
   const formatBrPhone = (raw: string) => {
     const digits = raw.replace(/\D/g, "");

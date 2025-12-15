@@ -54,6 +54,23 @@ export type Database = {
           sexo?: string | null
           tempo?: number | null
         }
+      },
+      settings: {
+        Row: {
+          key: string
+          value: boolean
+          updated_at: string
+        }
+        Insert: {
+          key: string
+          value?: boolean
+          updated_at?: string
+        }
+        Update: {
+          key?: string
+          value?: boolean
+          updated_at?: string
+        }
       }
     }
     Views: {
