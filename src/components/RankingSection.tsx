@@ -45,6 +45,33 @@ const RankingSection = () => {
   }, []);
 
   useEffect(() => {
+    const loadFlag = async () => {
+      try {
+        const env = import.meta.env as { VITE_SUPABASE_URL?: string; VITE_SUPABASE_PUBLISHABLE_KEY?: string };
+        if (env.VITE_SUPABASE_URL && env.VITE_SUPABASE_PUBLISHABLE_KEY) {
+          const { data, error } = await supabase
+            .from("settings")
+            .select("value")
+            .eq("key", "final_corrida")
+            .maybeSingle();
+          if (!error && data && typeof data.value === "boolean") {
+            setVisible(Boolean(data.value));
+            try {
+              localStorage.setItem("finalCorrida", data.value ? "1" : "0");
+            } catch {
+              console.warn("Falha ao gravar finalCorrida no localStorage");
+            }
+          }
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.warn("Erro ao consultar settings:", msg);
+      }
+    };
+    loadFlag();
+  }, []);
+
+  useEffect(() => {
     const load = async () => {
       setLoading(true);
       setError(null);

@@ -139,30 +139,54 @@ const ConfigPanel = ({ open, onOpenChange }: Props) => {
   useEffect(() => {
     try {
       localStorage.setItem("finalCorrida", finalCorrida ? "1" : "0");
-    } catch {}
+    } catch {
+      console.warn("Falha ao gravar finalCorrida no localStorage");
+    }
   }, [finalCorrida]);
 
-  const maleRows = useMemo(() =>
-    rows
-      .filter((r) => {
-        const sexo = (r.sexo || "").toLowerCase();
-        return sexo.startsWith("m") && r.tempo != null;
-      })
-      .slice()
-      .sort((a, b) => (a.tempo ?? Infinity) - (b.tempo ?? Infinity)),
-    [rows]
-  );
+  useEffect(() => {
+    const loadFlag = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("settings")
+          .select("value")
+          .eq("key", "final_corrida")
+          .maybeSingle();
+        if (error) {
+          console.warn("Falha ao carregar flag final_corrida:", error.message);
+          return;
+        }
+        if (data && typeof data.value === "boolean") {
+          setFinalCorrida(Boolean(data.value));
+          try {
+            localStorage.setItem("finalCorrida", data.value ? "1" : "0");
+          } catch {
+            console.warn("Falha ao gravar finalCorrida no localStorage");
+          }
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : String(e);
+        console.warn("Erro ao consultar settings:", msg);
+      }
+    };
+    if (open && authorized) {
+      loadFlag();
+    }
+  }, [open, authorized]);
 
-  const femaleRows = useMemo(() =>
-    rows
-      .filter((r) => {
-        const sexo = (r.sexo || "").toLowerCase();
-        return sexo.startsWith("f") && r.tempo != null;
-      })
-      .slice()
-      .sort((a, b) => (a.tempo ?? Infinity) - (b.tempo ?? Infinity)),
-    [rows]
-  );
+  const toggleFinalCorrida = async (checked: boolean) => {
+    setFinalCorrida(checked);
+    try {
+      await supabase
+        .from("settings")
+        .upsert({ key: "final_corrida", value: checked, updated_at: new Date().toISOString() });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.warn("Erro ao salvar flag final_corrida:", msg);
+    }
+  };
+
+  
 
   return (
     <>
@@ -336,63 +360,23 @@ const ConfigPanel = ({ open, onOpenChange }: Props) => {
                         ))}
                       </tbody>
                     </table>
-                  </div>
-                )}
-                <div className="mt-4 p-4 border rounded-md">
+                </div>
+              )}
+              <div className="mt-4 p-4 border rounded-md">
                   <label className="flex items-center gap-2">
                     <input
                       type="checkbox"
                       checked={finalCorrida}
-                      onChange={(e) => setFinalCorrida(e.target.checked)}
+                      onChange={(e) => toggleFinalCorrida(e.target.checked)}
                       className="h-4 w-4"
                     />
                     <span className="font-semibold">Final de Corrida</span>
                   </label>
-                  {finalCorrida && (
-                    <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-4 border rounded-md">
-                        <h3 className="text-lg font-semibold mb-2">Ranking Masculino</h3>
-                        {maleRows.length === 0 ? (
-                          <p className="text-muted-foreground">Sem tempos cadastrados.</p>
-                        ) : (
-                          <ol className="space-y-2">
-                            {maleRows.map((r, idx) => (
-                              <li key={r.id} className="flex items-center gap-3">
-                                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 font-bold">
-                                  {idx + 1}
-                                </span>
-                                <span className="flex-1">{r.nome}</span>
-                                <span className="text-muted-foreground">{formatSecondsToClock(r.tempo)}</span>
-                              </li>
-                            ))}
-                          </ol>
-                        )}
-                      </div>
-                      <div className="p-4 border rounded-md">
-                        <h3 className="text-lg font-semibold mb-2">Ranking Feminino</h3>
-                        {femaleRows.length === 0 ? (
-                          <p className="text-muted-foreground">Sem tempos cadastrados.</p>
-                        ) : (
-                          <ol className="space-y-2">
-                            {femaleRows.map((r, idx) => (
-                              <li key={r.id} className="flex items-center gap-3">
-                                <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-pink-100 text-pink-600 font-bold">
-                                  {idx + 1}
-                                </span>
-                                <span className="flex-1">{r.nome}</span>
-                                <span className="text-muted-foreground">{formatSecondsToClock(r.tempo)}</span>
-                              </li>
-                            ))}
-                          </ol>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
+      </div>
       )}
     </>
   );

@@ -19,7 +19,7 @@ const RegistrationForm = () => {
     tamanho_camisa: "",
     quer_camisa: false,
   });
-  const registrationsClosed = false;
+  const registrationsClosed = true;
   
   const formatBrPhone = (raw: string) => {
     const digits = raw.replace(/\D/g, "");
@@ -194,9 +194,6 @@ const RegistrationForm = () => {
             <img src="/camisa.jpeg" alt="Camisa do evento" className="w-full h-full object-cover" />
           </div>
           <div>
-            <div className="mb-4 rounded-2xl border border-secondary bg-secondary/10 p-4 text-center">
-              <p className="text-lg font-semibold text-secondary">Sem personalização do nome; tamanhos disponíveis: M e G</p>
-            </div>
             <div className="mb-8 rounded-2xl border border-secondary bg-secondary/10 p-6 text-center">
               <p className="text-2xl font-bold text-secondary">Valor: R$ 70,00</p>
               <p className="mt-2 text-foreground">Pague com PIX para: <span className="font-medium">corridaparaoeverest@gmail.com</span></p>
