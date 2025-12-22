@@ -107,7 +107,7 @@ const RegistrationForm = () => {
       });
       return;
     }
-    if (formData.quer_camisa && !["M", "G"].includes(formData.tamanho_camisa)) {
+    if (formData.quer_camisa && !["G"].includes(formData.tamanho_camisa)) {
       toast({
         title: "Tamanho da camisa",
         description: "Somente tamanhos M e G estão disponíveis.",
