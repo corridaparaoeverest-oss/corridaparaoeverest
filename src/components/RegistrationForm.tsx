@@ -110,7 +110,7 @@ const RegistrationForm = () => {
     if (formData.quer_camisa && !["G"].includes(formData.tamanho_camisa)) {
       toast({
         title: "Tamanho da camisa",
-        description: "Somente tamanhos M e G estão disponíveis.",
+        description: "Somente tamanho G está disponível.",
         variant: "destructive",
       });
       return;
@@ -314,7 +314,6 @@ const RegistrationForm = () => {
                         <SelectValue placeholder="Selecione o tamanho" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="M">M</SelectItem>
                         <SelectItem value="G">G</SelectItem>
                       </SelectContent>
                     </Select>
